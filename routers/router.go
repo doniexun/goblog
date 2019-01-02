@@ -1,10 +1,10 @@
 package routers
 
 import (
-	"github.com/doniexun/goblog/controllers"
+	"github.com/doniexun/goblog/controllers/front"
 	"github.com/astaxie/beego"
 )
 
 func init() {
-    beego.Router("/", &controllers.BaseController{})
+    beego.Router("/", &front.BaseController{})
 }

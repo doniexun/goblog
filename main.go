@@ -16,9 +16,6 @@ func main() {
 	
 	post.Insert()
 	
-	beego.Run()
-	
-	
-	
+	beego.Run()		
 }
 
