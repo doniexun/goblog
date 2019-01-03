@@ -6,7 +6,7 @@ import (
 
 // Option 系统配置项
 type Option struct {
-	ID    int64 `orm:"auto;pk"`
+	Id    int64 `orm:"auto;pk"`
 	Name  string
 	Value string
 }

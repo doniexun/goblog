@@ -6,8 +6,8 @@ import (
 
 // Post 文章
 type Post struct {
-	ID         int64 `orm:"auto;pk"`
-	AuthorID   int64
+	Id         int `orm:"auto;pk"`
+	AuthorId   int
 	AuthorName string `orm:"size(128)"`
 	Title      string `orm:"size(256)"`
 	Content    string `orm:"type(text)"`

@@ -1,10 +1,11 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-
-	"fmt"
+	_ "github.com/go-sql-driver/mysql" // 用于引入 mysql 驱动
 )
 
 func init() {
@@ -25,6 +26,7 @@ func init() {
 	fmt.Printf("数据库连接成功！%s\r\n", conn)
 	// 注册数据库表（若不注册模型，则不会在DB中生成对应的表）
 	orm.RegisterModel(new(User), new(Post), new(Option))
+	//orm.RegisterModelWithPrefix("t_", new(User), new(Post), new(Option))  //带前缀的表
 
 	orm.Debug = true
 	orm.RunSyncdb("default", false, true) // true 改成false，如果表存在则会给出提示，如果改成false则不会提示 ，这句话没有会报主键不存在的错误

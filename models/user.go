@@ -6,7 +6,7 @@ import (
 
 // User 用户
 type User struct {
-	ID       int64  `orm:"auto;pk"`
+	Id       int    `orm:"auto;pk"`
 	Name     string `orm:"unique;size(100)"`
 	Password string `orm:"size(100)"`
 	Email    string `orm:"unique;size(100)"`

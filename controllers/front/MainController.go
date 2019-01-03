@@ -38,3 +38,18 @@ func (c *MainController) Index() {
 	c.Data["list"] = list
 	c.TplName = "index.tpl" // 相对路径：相对于工程根目录 views/
 }
+
+// Show 显示指定编号的文章
+func (c *MainController) Show() {
+	var (
+		post models.Post
+	)
+	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	post.Id = id
+	if err := post.Read(); err != nil {
+		c.Data["post"] = "Have not post..."
+	}
+
+	c.Data["post"] = post
+	c.TplName = "index.tpl" // 相对路径：相对于工程根目录 views/
+}

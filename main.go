@@ -1,9 +1,9 @@
 package main
 
 import (
-	_ "github.com/doniexun/goblog/routers"
-	"github.com/doniexun/goblog/models"
 	"github.com/astaxie/beego"
+	"github.com/doniexun/goblog/models"
+	_ "github.com/doniexun/goblog/routers"
 )
 
 func main() {
@@ -13,9 +13,8 @@ func main() {
 	post.AuthorName = "windness"
 	post.Title = "Test Post Title"
 	post.Content = "A testing post's content"
-	
-	post.Insert()
-	
-	beego.Run()		
-}
 
+	post.Insert()
+
+	beego.Run()
+}

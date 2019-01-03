@@ -7,4 +7,5 @@ import (
 
 func init() {
 	beego.Router("/", &front.MainController{}, "get:Index")
+	beego.Router("/post/:id:int", &front.MainController{}, "get:Show")
 }

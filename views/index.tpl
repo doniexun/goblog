@@ -24,6 +24,7 @@
 				</div>
 			</article>
 		{{end}}
+		<h1>A post: {{.post.Content}}</h1>
 	</div>
 
 
