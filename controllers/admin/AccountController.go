@@ -1,6 +1,9 @@
 package admin
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/astaxie/beego"
 	"github.com/doniexun/goblog/models"
 	"github.com/lisijie/goblog/util"
@@ -24,23 +27,36 @@ func (c *AccountController) Login() {
 	username := c.GetString("username")
 	password := c.GetString("password")
 
+	fmt.Println(username)
+	fmt.Println(password)
+
 	if username != "" && password != "" {
 		var user models.User
-		if user.Read("user_name") != nil || user.Password != util.Md5([]byte(password)) {
+		user.Name = username
+		if user.Read("name") != nil || user.Password != "123456" || user.Name != "windness" {
+			//user.Password != util.Md5([]byte(password)) {
 			c.Data["errmsg"] = "账号或密码错误"
+			fmt.Println("账号或密码错误")
 		} else {
 			authkey := util.Md5([]byte(user.Password))
-			c.Ctx.SetCookie("auth", authkey)
+			cookie := strconv.Itoa(user.Id) + "|" + authkey
+			c.Ctx.SetCookie("auth", cookie)
+			fmt.Println("账号和密码正确")
 		}
 	}
 
+	// 跳转到后台主页 or 传回 json 字串[TODO]
+	// ...
 	c.Data["post"] = "test content"
 	c.TplName = "admin/index.tpl"
 }
 
 // Logout 用户退出
 func (c *AccountController) Logout() {
+	c.Ctx.SetCookie("auth", "")
 
+	// 跳转到登录页面 or 传回 json 字串[TODO]
+	// ...
 }
 
 // Profile 用户信息

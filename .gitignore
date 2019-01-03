@@ -15,3 +15,6 @@
 goblog
 debug
 
+# project file/directory for vscode
+.vscode
+
