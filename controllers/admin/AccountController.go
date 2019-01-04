@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/astaxie/beego"
 	"github.com/doniexun/goblog/models"
 	"github.com/lisijie/goblog/util"
 )
 
 // AccountController 用户账户 controller
 type AccountController struct {
-	beego.Controller
+	BaseController
 }
 
 // Get 一个例子
@@ -33,8 +32,7 @@ func (c *AccountController) Login() {
 	if username != "" && password != "" {
 		var user models.User
 		user.Name = username
-		if user.Read("name") != nil || user.Password != "123456" || user.Name != "windness" {
-			//user.Password != util.Md5([]byte(password)) {
+		if user.Read("name") != nil || user.Password != util.Md5([]byte(password)) {
 			c.Data["errmsg"] = "账号或密码错误"
 			fmt.Println("账号或密码错误")
 		} else {
@@ -61,5 +59,13 @@ func (c *AccountController) Logout() {
 
 // Profile 用户信息
 func (c *AccountController) Profile() {
-
+	user := models.User{Id: c.userid}
+	if err := user.Read(); err != nil {
+		fmt.Println("The user not exists")
+	}
+	fmt.Println(user.Id)
+	fmt.Println(user.Name)
+	fmt.Println(user.Email)
+	c.Data["user"] = user
+	c.TplName = "admin/user.tpl"
 }

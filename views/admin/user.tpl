@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>Beego</title>
+  <title>User Profile</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 </head>
@@ -17,13 +17,7 @@
   </header>
 
 	<div itemscope itemtype="http://schema.org/Blog">
-		{{range $k, $v := .list}}
-			<article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-				<div class="meta">
-					{{$k}}  -- {{$v}}
-				</div>
-			</article>
-		{{end}}
+		<h1>A user: {{.user}}</h1>
 	</div>
 
 

@@ -28,7 +28,11 @@ func init() {
 	orm.RegisterModel(new(User), new(Post), new(Option))
 	//orm.RegisterModelWithPrefix("t_", new(User), new(Post), new(Option))  //带前缀的表
 
-	orm.Debug = true
+	// 只在开发模式下才开启 orm 的 Debug 功能
+	if beego.AppConfig.String("runmode") == "dev" {
+		orm.Debug = true
+	}
+
 	orm.RunSyncdb("default", false, true) // true 改成false，如果表存在则会给出提示，如果改成false则不会提示 ，这句话没有会报主键不存在的错误
 
 }
