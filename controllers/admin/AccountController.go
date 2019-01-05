@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/doniexun/goblog/models"
 	"github.com/lisijie/goblog/util"
@@ -19,6 +20,49 @@ func (c *AccountController) Get() {
 	c.Data["Email"] = "astaxie@gmail.com"
 	c.Data["USER_AGENT"] = c.Ctx.Input.Header("user-agent")
 	c.TplName = "index.tpl"
+}
+
+// Register 用户注册
+func (c *AccountController) Register() {
+	username := c.GetString("username")
+	password := c.GetString("password")
+	email := c.GetString("email")
+
+	// 对用户名、用户密码、email 进行合规性校验
+	l := strings.Count(username, "") - 1
+	if l < 2 || l > 16 {
+		c.Data["errmsg"] = "用户名长度限制在 2-16 个字符"
+		c.Data["msg"] = ""
+		c.TplName = "user.tpl"
+		// [TODO] 向客户端发送 json
+		return
+	}
+
+	// 对密码、email进行校验
+	// ...[TODO]
+
+	// 对用户名是否已注册进行校验
+	var user models.User
+	user.Name = username
+	if user.Query().Filter("name", username).One(&user); user.Id > 0 {
+		c.Data["errmsg"] = "用户名" + username + "已被注册"
+		c.Data["msg"] = ""
+		c.TplName = "user.tpl"
+		//[TODO] 向客户端发送 json
+		return
+	}
+
+	//if err := user.Read(); err != nil {
+	//	c.Data["errmsg"] = "用户名已被注册"
+	//	return //[TODO] 向客户端发送 json
+	//}
+
+	user.Email = email
+	user.Password = util.Md5([]byte(password))
+	user.Insert()
+
+	c.Data["msg"] = "用户 " + username + " 注册成功！"
+	c.TplName = "user.tpl"
 }
 
 // Login 用户登录
