@@ -25,7 +25,7 @@ func init() {
 	orm.RegisterDataBase("default", "mysql", conn)
 	fmt.Printf("数据库连接成功！%s\r\n", conn)
 	// 注册数据库表（若不注册模型，则不会在DB中生成对应的表）
-	orm.RegisterModel(new(User), new(Post), new(Option))
+	orm.RegisterModel(new(User), new(Post), new(Option), new(Group), new(Punch))
 	//orm.RegisterModelWithPrefix("t_", new(User), new(Post), new(Option))  //带前缀的表
 
 	// 只在开发模式下才开启 orm 的 Debug 功能
