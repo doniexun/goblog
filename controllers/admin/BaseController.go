@@ -38,10 +38,10 @@ func (c *BaseController) auth() {
 		userid, _ := strconv.Atoi(idstr)
 		if userid > 0 {
 			var user models.User
-			user.Id = userid
+			user.ID = userid
 			if user.Read() == nil && password == util.Md5([]byte(user.Password)) {
 				c.userid = userid
-				c.username = user.Name
+				c.username = user.UserName
 			}
 		}
 	}

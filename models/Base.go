@@ -1,5 +1,14 @@
 package models
 
+// 如果用户利用用户菜单创建打卡（事项）时，
+// 会创建一个 PunchItem ，
+// 同时会创建一个 Group ，并自动成为群主、群成员之一、创建者，
+// 并将该 PunchItem 绑定到 Group 中。
+
+// 如果用户利用群菜单创建打卡（事项）时，
+// 会创建一个 PunchItem ,
+// 并将该 PunchItem 绑定到 Group 中。
+
 import (
 	"fmt"
 
@@ -25,7 +34,14 @@ func init() {
 	orm.RegisterDataBase("default", "mysql", conn)
 	fmt.Printf("数据库连接成功！%s\r\n", conn)
 	// 注册数据库表（若不注册模型，则不会在DB中生成对应的表）
-	orm.RegisterModel(new(User), new(Post), new(Option), new(Group), new(Punch))
+	orm.RegisterModel(
+		new(User),
+		new(Group),
+		new(Post),
+		new(Option),
+		new(PunchItem),
+		new(PunchRecord))
+
 	//orm.RegisterModelWithPrefix("t_", new(User), new(Post), new(Option))  //带前缀的表
 
 	// 只在开发模式下才开启 orm 的 Debug 功能

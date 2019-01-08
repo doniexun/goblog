@@ -54,7 +54,7 @@ func (c *PostController) Add() {
 		return
 	}
 
-	post.AuthorId = c.userid
+	post.AuthorID = c.userid
 	post.AuthorName = c.username
 	post.Content = content
 	post.Title = title
@@ -67,7 +67,7 @@ func (c *PostController) Add() {
 // Delete 删除文章
 func (c *PostController) Delete() {
 	id, _ := c.GetInt("id")
-	post := models.Post{Id: id}
+	post := models.Post{ID: id}
 	if post.Read() == nil {
 		post.Delete()
 	}
@@ -82,7 +82,7 @@ func (c *PostController) Update() {
 	)
 
 	id, _ = c.GetInt("id")
-	post.Id = id
+	post.ID = id
 	if post.Read() != nil {
 		c.Abort("404")
 	}
@@ -96,7 +96,7 @@ func (c *PostController) Update() {
 		return
 	}
 
-	post.AuthorId = c.userid
+	post.AuthorID = c.userid
 	post.AuthorName = c.username
 	post.Content = content
 	post.Title = title

@@ -43,8 +43,8 @@ func (c *AccountController) Register() {
 
 	// 对用户名是否已注册进行校验
 	var user models.User
-	user.Name = username
-	if user.Query().Filter("name", username).One(&user); user.Id > 0 {
+	user.UserName = username
+	if user.Query().Filter("username", username).One(&user); user.ID > 0 {
 		c.Data["errmsg"] = "用户名" + username + "已被注册"
 		c.Data["msg"] = ""
 		c.TplName = "user.tpl"
@@ -75,13 +75,13 @@ func (c *AccountController) Login() {
 
 	if username != "" && password != "" {
 		var user models.User
-		user.Name = username
+		user.UserName = username
 		if user.Read("name") != nil || user.Password != util.Md5([]byte(password)) {
 			c.Data["errmsg"] = "账号或密码错误"
 			fmt.Println("账号或密码错误")
 		} else {
 			authkey := util.Md5([]byte(user.Password))
-			cookie := strconv.Itoa(user.Id) + "|" + authkey
+			cookie := strconv.Itoa(user.ID) + "|" + authkey
 			c.Ctx.SetCookie("auth", cookie)
 			fmt.Println("账号和密码正确")
 		}
@@ -103,12 +103,12 @@ func (c *AccountController) Logout() {
 
 // Profile 用户信息
 func (c *AccountController) Profile() {
-	user := models.User{Id: c.userid}
+	user := models.User{ID: c.userid}
 	if err := user.Read(); err != nil {
 		fmt.Println("The user not exists")
 	}
-	fmt.Println(user.Id)
-	fmt.Println(user.Name)
+	fmt.Println(user.ID)
+	fmt.Println(user.UserName)
 	fmt.Println(user.Email)
 	c.Data["user"] = user
 	c.TplName = "admin/user.tpl"
