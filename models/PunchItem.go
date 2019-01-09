@@ -21,7 +21,8 @@ type PunchItem struct {
 	Avatar         string       `orm:"size(100);null"`                  // 打卡封面头像所在 URL 地址
 	BeginTime      time.Time    `orm:"type(datetime)"`                  // 开始打卡时间
 	EndTime        time.Time    `orm:"type(datetime)"`                  // 结束打卡时间
-	Period         time.Time    `orm:"type(datetime);null"`             // 打卡周期 [TODO] 默认一天周期
+	PeriodUnit     int          `orm:"size(5);default(3)"`              // 周期的单位：0：秒，1：分钟；2：小时；3.天；4：周；5：月；6：季度；7：半年；8：年
+	PeriodValue    int64        `orm:"default(1)"`                      // 打卡周期，默认一天周期
 	ActiveBonus    int          `orm:"default(0)"`                      // 活跃积分（活跃度）
 	Groups         []*Group     `orm:"rel(m2m);null"`                   // 归属于群
 	Punchers       []*User      `orm:"rel(m2m);null"`                   // 关联的打卡人

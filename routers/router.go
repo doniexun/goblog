@@ -16,6 +16,8 @@ func init() {
 	beego.Router("/test/adddemouser", &admin.AccountController{}, "post:AddDemoUser")
 	// 调试用接口：POST /test/adddemopost
 	beego.Router("/test/adddemopost", &admin.PostController{}, "post:AddDemoPost")
+	// 调试用接口：POST /test/createpunch
+	beego.Router("/test/createpunch", &admin.PunchController{}, "post:CreatePunch")
 
 	// 访问示例：POST /admin/account/register，参数：username=xxx,password=xxx
 	beego.Router("/admin/account/register", &admin.AccountController{}, "post:Register") // 注册
