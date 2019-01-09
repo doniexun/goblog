@@ -19,7 +19,7 @@ type Group struct {
 	ActiveBonus    int          `orm:"default(0)"`                      // 活跃积分
 	Status         int          `orm:"default(0)"`                      // 群账号状态：0：正常；1：异常；2：注销
 	Announcement   string       `orm:"size(512);null"`                  // 群公告
-	Members        []*User      `orm:"reverse(many)"`                   // 群成员（与群是多对多的关系）
+	Members        []*User      `orm:"reverse(many);null"`              // 群成员（与群是多对多的关系）
 	PunchItems     []*PunchItem `orm:"reverse(many);null"`              // 打卡事项（一个群可以有多个打卡事项，对应多个打卡记录，群和打卡事项是多对多的关系）
 }
 

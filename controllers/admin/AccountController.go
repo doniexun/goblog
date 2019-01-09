@@ -15,14 +15,6 @@ type AccountController struct {
 	BaseController
 }
 
-// Get 一个例子
-func (c *AccountController) Get() {
-	c.Data["Website"] = "beego.me"
-	c.Data["Email"] = "astaxie@gmail.com"
-	c.Data["USER_AGENT"] = c.Ctx.Input.Header("user-agent")
-	c.TplName = "index.tpl"
-}
-
 // Register 用户注册
 func (c *AccountController) Register() {
 	username := c.GetString("username")

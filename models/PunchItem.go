@@ -23,9 +23,9 @@ type PunchItem struct {
 	EndTime        time.Time    `orm:"type(datetime)"`                  // 结束打卡时间
 	Period         time.Time    `orm:"type(datetime);null"`             // 打卡周期 [TODO] 默认一天周期
 	ActiveBonus    int          `orm:"default(0)"`                      // 活跃积分（活跃度）
-	Group          []*Group     `orm:"rel(m2m);null"`                   // 归属于群
+	Groups         []*Group     `orm:"rel(m2m);null"`                   // 归属于群
 	Punchers       []*User      `orm:"rel(m2m);null"`                   // 关联的打卡人
-	PunchRecord    *PunchRecord `orm:"reverse(one)"`                    // 一个打卡事项对应一个打卡记录
+	PunchRecord    *PunchRecord `orm:"reverse(one);null"`               // 一个打卡事项对应一个打卡记录
 }
 
 // Insert 插入当前打卡事项
