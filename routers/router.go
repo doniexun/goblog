@@ -12,6 +12,11 @@ func init() {
 	// 访问示例：GET /post/1
 	beego.Router("/post/:id:int", &front.MainController{}, "get:Show") // 显示指定文章
 
+	// 调试用接口：POST /test/adddemouser
+	beego.Router("/test/adddemouser", &admin.AccountController{}, "post:AddDemoUser")
+	// 调试用接口：POST /test/adddemopost
+	beego.Router("/test/adddemopost", &admin.PostController{}, "post:AddDemoPost")
+
 	// 访问示例：POST /admin/account/register，参数：username=xxx,password=xxx
 	beego.Router("/admin/account/register", &admin.AccountController{}, "post:Register") // 注册
 	// 访问示例：POST /admin/account/login，参数：username=xxx,password=xxx

@@ -106,3 +106,13 @@ func (c *PostController) Update() {
 	// ...[TODO]
 	c.Redirect("/admin/post/list", 302)
 }
+
+// AddDemoPost 添加示例文章
+func (c *PostController) AddDemoPost() {
+	var post models.Post
+	post.AuthorID = 1
+	post.AuthorName = "windness"
+	post.Title = "Test Post Title"
+	post.Content = "A testing post's content"
+	post.Insert()
+}

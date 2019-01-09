@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/doniexun/goblog/models"
 	"github.com/lisijie/goblog/util"
@@ -112,4 +113,21 @@ func (c *AccountController) Profile() {
 	fmt.Println(user.Email)
 	c.Data["user"] = user
 	c.TplName = "admin/user.tpl"
+}
+
+// AddDemoUser 添加测试用户
+func (c *AccountController) AddDemoUser() {
+	var user models.User
+	user.UserName = "windness"
+	user.NickName = "doniexun"
+	user.Password = util.Md5([]byte("123456"))
+	user.Email = "windnessr@163.com"
+	user.QQ = "1758953369"
+	user.Wechat = "splendidream"
+	user.Cellphone = "13800138000"
+	user.RegisterTime = time.Now()
+	user.RegsiterIP = c.ClientIP()
+	user.LastLoginTime = time.Now()
+	user.LastLoginIP = c.ClientIP()
+	user.Insert()
 }

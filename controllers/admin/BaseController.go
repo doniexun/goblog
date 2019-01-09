@@ -46,3 +46,10 @@ func (c *BaseController) auth() {
 		}
 	}
 }
+
+// ClientIP 获取连接客户端 IP 地址
+func (c *BaseController) ClientIP() string {
+	addr := c.Ctx.Request.RemoteAddr
+	addrArray := strings.Split(addr, ":")
+	return addrArray[0]
+}
