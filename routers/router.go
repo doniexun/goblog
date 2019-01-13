@@ -16,8 +16,10 @@ func init() {
 	beego.Router("/test/adddemouser", &admin.AccountController{}, "post:AddDemoUser")
 	// [调试]添加demo文章接口：POST /test/adddemopost
 	beego.Router("/test/adddemopost", &admin.PostController{}, "post:AddDemoPost")
-	// [调试]创建打卡事项接口：POST /test/createpunch
+	// [调试]创建打卡事项接口：POST /test/createpunch[?group=xxx]
 	beego.Router("/test/createpunch", &admin.PunchController{}, "post:CreatePunch")
+	// [调试]删除打卡事项接口：GET /test/deletepunch?id=xxx
+	beego.Router("/test/deletepunch", &admin.PunchController{}, "get:DeletePunch")
 	// [调试]获取服务器返回的json格式数据：GET /test/json
 	beego.Router("/test/json", &admin.PunchController{}, "get:JSONInfo")
 

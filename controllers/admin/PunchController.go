@@ -141,8 +141,65 @@ func (c *PunchController) CreatePunch() {
 
 // DeletePunch 删除打卡事项
 func (c *PunchController) DeletePunch() {
-	//username := c.GetString("username")
+	pid, err := c.GetInt64("id")
+	if err != nil {
+		log.Println("非法打卡事项" + err.Error())
+		c.BackToClientReponse(false, "非法打卡事项")
+		return
+	}
 
+	// 查询打卡事项
+	var punchItem models.PunchItem
+	punchItem.ID = pid
+	if err = punchItem.Read(); err != nil {
+		log.Println("打卡事项不存在" + err.Error())
+		c.BackToClientReponse(false, "打卡事项不存在")
+		return
+	}
+
+	title := punchItem.Title
+
+	// 删除用户表中的记录
+	// 删除多对多关系中的打卡事项
+	user := models.User{ID: c.userID}
+	m2m := orm.NewOrm().QueryM2M(&user, "PunchItems")
+	if m2m.Exist(&punchItem) { // 只在存在 多对多关系时 删除；[TODO] 是否不判断，直接删除，效率更高？
+		if _, err = m2m.Remove(&punchItem); err != nil {
+			log.Println("用户表中的打卡事项移除失败" + err.Error())
+			c.BackToClientReponse(false, "用户表中的打卡事项移除失败")
+			return
+		}
+	}
+
+	// 删除群组表中的记录
+	// 删除多对多关系中的打卡事项
+	// [TODO] 待修复：目前删除打卡事项，群组和打卡事项的关系未解除！--2019-01-14 07:14:42
+	if _, err = orm.NewOrm().LoadRelated(&punchItem, "Groups"); err != nil { // 加载关系字段
+		for _, group := range punchItem.Groups {
+			m2m := orm.NewOrm().QueryM2M(&group, "PunchItems")
+			if m2m.Exist(&punchItem) { // 只在存在 多对多关系时 删除；[TODO] 是否不判断，直接删除，效率更高？
+				if _, err = m2m.Remove(&punchItem); err != nil {
+					log.Println("群组 " + group.Name + " 中的打卡事项 " + title + "移除失败" + err.Error())
+					c.BackToClientReponse(false, "群组 "+group.Name+" 中的打卡事项 "+title+"移除失败")
+					return
+				}
+			}
+		}
+	}
+
+	// 删除对应打卡记录表中的记录
+	// 删除多对多关系中的打卡事项
+	// 在 PunchRecord 表中设置了，当关联 PunchItem 删除时，自动级联删除
+	// 所以此处无需代码操作
+
+	// 删除打卡事项表中的记录
+	if err = punchItem.Delete(); err != nil {
+		log.Println("打卡事项 " + title + " 删除失败" + err.Error())
+		c.BackToClientReponse(false, "打卡事项 "+title+" 删除失败")
+		return
+	}
+
+	c.BackToClientReponse(true, "打卡事项 "+title+"删除成功")
 }
 
 // ClosePunch 关闭打卡事项
