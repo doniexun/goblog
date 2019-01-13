@@ -68,7 +68,7 @@ func (c *PunchController) CreatePunch() {
 	if groupID > 0 { // 群内创建
 		// 查找群实例
 		group = new(models.Group)
-		group.ID = groupID
+		group.ID = int64(groupID)
 		if err := group.Read(); err != nil {
 			log.Println("群实例未能找到，原因可能是群编号有误" + err.Error())
 			c.BackToClientReponse(false, "群实例未能找到，原因可能是群编号有误")

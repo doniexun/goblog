@@ -79,7 +79,7 @@ func (c *AccountController) Login() {
 	}
 
 	authkey := util.Md5([]byte(user.Password))
-	cookie := strconv.Itoa(user.ID) + "|" + authkey
+	cookie := strconv.FormatInt(user.ID, 10) + "|" + authkey
 	c.Ctx.SetCookie("auth", cookie)
 	c.BackToClientReponse(true, "登录成功")
 }

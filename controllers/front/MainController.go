@@ -45,7 +45,7 @@ func (c *MainController) Show() {
 		post models.Post
 	)
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	post.ID = id
+	post.ID = int64(id)
 	if err := post.Read(); err != nil {
 		c.Data["post"] = "Have not post..."
 	}

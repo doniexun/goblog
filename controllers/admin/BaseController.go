@@ -15,7 +15,7 @@ import (
 type BaseController struct {
 	beego.Controller
 
-	userID         int    // 登录用户的 id
+	userID         int64  // 登录用户的 id
 	userName       string // 登录用户的 名称
 	controllerName string // 控制器名称
 	actionName     string // 操作名称
@@ -44,9 +44,9 @@ func (c *BaseController) auth() {
 		if userid, err := strconv.Atoi(idstr); err == nil {
 			if userid > 0 {
 				user := &models.User{}
-				user.ID = userid
+				user.ID = int64(userid)
 				if user.Read() == nil && password == util.Md5([]byte(user.Password)) {
-					c.userID = userid
+					c.userID = int64(userid)
 					c.userName = user.UserName
 					log.Println("用户授权通过，当前用户 ID 是：" + idstr)
 				}

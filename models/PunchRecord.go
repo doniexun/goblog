@@ -8,7 +8,7 @@ import (
 
 // PunchRecord 打卡记录
 type PunchRecord struct {
-	ID        int        `orm:"column(id);auto;pk"`
+	ID        int64      `orm:"column(id);auto;pk"`
 	Puncher   *User      `orm:"rel(fk)"`                     // 打卡人
 	PunchItem *PunchItem `orm:"rel(one)"`                    // 一个打卡记录只能对应一个打卡事项，一个打卡事项也只能对应一个打卡记录
 	PunchTime time.Time  `orm:"auto_now_add;type(datetime)"` // 打卡时间

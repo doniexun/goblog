@@ -66,7 +66,7 @@ func (c *PostController) Add() {
 
 // Delete 删除文章
 func (c *PostController) Delete() {
-	id, _ := c.GetInt("id")
+	id, _ := c.GetInt64("id")
 	post := models.Post{ID: id}
 	if post.Read() == nil {
 		post.Delete()
@@ -82,7 +82,7 @@ func (c *PostController) Update() {
 	)
 
 	id, _ = c.GetInt("id")
-	post.ID = id
+	post.ID = int64(id)
 	if post.Read() != nil {
 		c.Abort("404")
 	}
