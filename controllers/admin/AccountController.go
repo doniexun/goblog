@@ -2,6 +2,7 @@ package admin
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -107,6 +108,11 @@ func (c *AccountController) Profile() {
 func (c *AccountController) AddDemoUser() {
 	var user models.User
 	user.UserName = "windness"
+	if err := user.Read("UserName"); err == nil && user.ID > 0 {
+		log.Println("用户添加失败，用户 " + user.UserName + " 已经存在")
+		c.BackToClientReponse(false, "用户添加失败，用户 "+user.UserName+" 已经存在")
+		return
+	}
 	user.NickName = "doniexun"
 	user.Password = util.Md5([]byte("123456"))
 	user.Email = "windnessr@163.com"
@@ -117,5 +123,12 @@ func (c *AccountController) AddDemoUser() {
 	user.RegsiterIP = c.ClientIP()
 	user.LastLoginTime = time.Now()
 	user.LastLoginIP = c.ClientIP()
-	user.Insert()
+	if err := user.Insert(); err != nil {
+		log.Println(err.Error())
+		c.BackToClientReponse(false, "用户添加失败")
+		return
+	}
+
+	c.BackToClientReponse(true, "用户"+user.UserName+"添加成功")
+
 }

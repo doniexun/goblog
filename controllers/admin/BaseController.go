@@ -2,7 +2,6 @@ package admin
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -33,7 +32,6 @@ func (c *BaseController) Get() {
 // Prepare 在此完成鉴权操作，所有后台操作之前都会先调用此函数
 func (c *BaseController) Prepare() {
 	c.controllerName, c.actionName = c.GetControllerAndAction()
-	fmt.Println(c.controllerName + " -- " + c.actionName)
 	c.auth()
 }
 

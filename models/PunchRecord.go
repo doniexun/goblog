@@ -12,7 +12,6 @@ type PunchRecord struct {
 	Puncher   *User      `orm:"rel(fk)"`                     // 打卡人
 	PunchItem *PunchItem `orm:"rel(one)"`                    // 一个打卡记录只能对应一个打卡事项，一个打卡事项也只能对应一个打卡记录
 	PunchTime time.Time  `orm:"auto_now_add;type(datetime)"` // 打卡时间
-
 }
 
 // Insert 插入当前打卡记录

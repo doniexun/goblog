@@ -88,17 +88,18 @@ func (c *PunchController) CreatePunch() {
 		group.LastUpdateTime = time.Now()
 		group.Announcement = "owner is lazy, no announcement..."
 		if err := group.Insert(); err != nil {
-			log.Println(err.Error())
+			log.Println("群主信息插入DB失败" + err.Error())
 			c.BackToClientReponse(false, "群主信息插入DB失败")
 			return
 		}
 
+		// 群主与用户的多对多关系
 		// 将用户添加到 group.Members 中
 		// 在 group 表中插入对应 user 的 id
 		// 在 user 表中并没有插入对应 group 的id
 		m2m := orm.NewOrm().QueryM2M(group, "Members")
 		if _, err := m2m.Add(user); err != nil {
-			log.Println(err.Error())
+			log.Println("用户信息插入群组失败" + err.Error())
 			c.BackToClientReponse(false, "用户信息插入群组失败")
 			return
 		}
@@ -110,18 +111,26 @@ func (c *PunchController) CreatePunch() {
 	punchItem.Creator = user
 	punchItem.LastUpdator = user
 	if err := punchItem.Insert(); err != nil {
-		log.Println(err.Error())
+		log.Println("打卡事项插入DB失败" + err.Error())
 		c.BackToClientReponse(false, "打卡事项插入DB失败")
 		return
 	}
 
-	// 打卡事项与群组的关系
+	// 打卡事项与打卡人的多对多关系
+	m2m := orm.NewOrm().QueryM2M(user, "PunchItems")
+	if _, err := m2m.Add(punchItem); err != nil {
+		log.Println("打卡事项关联用户失败" + err.Error())
+		c.BackToClientReponse(false, "打卡事项关联用户失败")
+		return
+	}
+
+	// 打卡事项与群组的多对多关系
 	// 将打卡事项添加到 group 中
 	// 在 group 表中插入对应 punchItem 的 id
 	// 在 punchItem 表中并没有插入对应 group 的id
-	m2m := orm.NewOrm().QueryM2M(group, "PunchItems")
+	m2m = orm.NewOrm().QueryM2M(group, "PunchItems")
 	if _, err := m2m.Add(punchItem); err != nil {
-		log.Println(err.Error())
+		log.Println("打卡事项插入群组失败" + err.Error())
 		c.BackToClientReponse(false, "打卡事项插入群组失败")
 		return
 	}

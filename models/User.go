@@ -26,7 +26,8 @@ type User struct {
 	ActiveBonus   int            `orm:"default(0)"`                     // 活跃积分
 	Status        int            `orm:"default(0)"`                     // 用户账号状态：0：正常；1：异常；2：注销
 	Groups        []*Group       `orm:"rel(m2m)"`                       // 用户所在群（若要查该用户创建的群，需要二次查询群表）
-	PunchRecords  []*PunchRecord `orm:"reverse(many)"`                  // 用户创建的打卡记录
+	PunchRecords  []*PunchRecord `orm:"reverse(many)"`                  // 用户的打卡记录
+	PunchItems    []*PunchItem   `orm:"rel(m2m)"`                       // 用户关注的打卡事项
 }
 
 // Insert 插入当前用户
