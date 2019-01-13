@@ -79,7 +79,7 @@ func (c *PunchController) CreatePunch() {
 		group = new(models.Group)
 		group.Owner = user
 		group.Name = user.UserName + "'s group"
-		group.NichName = "this group's nickname"
+		group.NichName = "this 群组's nickname"
 		group.Creator = user
 		group.CreateIP = c.ClientIP()
 		group.CreateTime = time.Now()

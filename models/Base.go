@@ -11,6 +11,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
@@ -25,14 +26,19 @@ func init() {
 	dbpassword := beego.AppConfig.String("dbpassword")
 	dbname := beego.AppConfig.String("dbname")
 
+	// 设置默认时区，否则无法在数据表中存储中文
+	// 切必须在注册数据库语句 orm.RegisterDatabase() 调用之前
+	orm.DefaultTimeLoc = time.Local
+
 	//注册mysql Driver
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	//构造conn连接
 	//用户名:密码@tcp(url地址)/数据库
-	conn := dbuser + ":" + dbpassword + "@tcp(" + dbhost + ":" + dbport + ")/" + dbname + "?charset=utf8"
+	conn := dbuser + ":" + dbpassword + "@tcp(" + dbhost + ":" + dbport + ")/" + dbname + "?charset=utf8&loc=Asia%2FShanghai"
 	//注册default数据库
 	orm.RegisterDataBase("default", "mysql", conn)
 	fmt.Printf("数据库连接成功！%s\r\n", conn)
+
 	// 注册数据库表（若不注册模型，则不会在DB中生成对应的表）
 	orm.RegisterModel(
 		new(User),
