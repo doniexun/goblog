@@ -9,6 +9,8 @@ import (
 // Group 群
 type Group struct {
 	ID             int          `orm:"column(id);auto;pk"`
+	Name           string       `orm:"size(50)"`                        // 群名称
+	NichName       string       `orm:"size(50)"`                        // 备注群名称
 	Owner          *User        `orm:"rel(fk)"`                         // 群主（一个群只能有一个群主，群主与群的关系是一对一的关系）
 	Creator        *User        `orm:"rel(fk)"`                         // 创建人（一个群只能有一个创建人，创建人与群的关系是一对一的关系）
 	CreateTime     time.Time    `orm:"auto_now_add;type(datetime)"`     // 创建时间

@@ -12,12 +12,14 @@ func init() {
 	// 访问示例：GET /post/1
 	beego.Router("/post/:id:int", &front.MainController{}, "get:Show") // 显示指定文章
 
-	// 调试用接口：POST /test/adddemouser
+	// [调试]添加demo用户接口：POST /test/adddemouser
 	beego.Router("/test/adddemouser", &admin.AccountController{}, "post:AddDemoUser")
-	// 调试用接口：POST /test/adddemopost
+	// [调试]添加demo文章接口：POST /test/adddemopost
 	beego.Router("/test/adddemopost", &admin.PostController{}, "post:AddDemoPost")
-	// 调试用接口：POST /test/createpunch
+	// [调试]创建打卡事项接口：POST /test/createpunch
 	beego.Router("/test/createpunch", &admin.PunchController{}, "post:CreatePunch")
+	// [调试]获取服务器返回的json格式数据：GET /test/json
+	beego.Router("/test/json", &admin.PunchController{}, "get:JSONInfo")
 
 	// 访问示例：POST /admin/account/register，参数：username=xxx,password=xxx
 	beego.Router("/admin/account/register", &admin.AccountController{}, "post:Register") // 注册

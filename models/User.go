@@ -7,6 +7,7 @@ import (
 )
 
 // User 用户
+/// [TODO] User 还是应该与 PunchItem 直接关联，不然在还未打卡前，无法查询用户加入的打卡事项。
 type User struct {
 	ID            int            `orm:"column(id);auto;pk"`
 	UserName      string         `orm:"unique;size(100)"`               // 用户名

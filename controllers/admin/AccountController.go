@@ -24,11 +24,7 @@ func (c *AccountController) Register() {
 	// 对用户名、用户密码、email 进行合规性校验
 	l := strings.Count(username, "") - 1
 	if l < 2 || l > 16 {
-		c.Data["errmsg"] = "用户名长度限制在 2-16 个字符"
-		c.Data["msg"] = ""
-		c.TplName = "user.tpl"
-		// [TODO] 向客户端发送 json
-		return
+		c.BackToClientReponse(false, "用户名长度限制在 2-16 个字符")
 	}
 
 	// 对密码、email进行校验
@@ -38,11 +34,7 @@ func (c *AccountController) Register() {
 	var user models.User
 	user.UserName = username
 	if user.Query().Filter("username", username).One(&user); user.ID > 0 {
-		c.Data["errmsg"] = "用户名" + username + "已被注册"
-		c.Data["msg"] = ""
-		c.TplName = "user.tpl"
-		//[TODO] 向客户端发送 json
-		return
+		c.BackToClientReponse(false, "用户名 "+username+" 已被注册")
 	}
 
 	//if err := user.Read(); err != nil {
@@ -52,54 +44,58 @@ func (c *AccountController) Register() {
 
 	user.Email = email
 	user.Password = util.Md5([]byte(password))
-	user.Insert()
+	if err := user.Insert(); err != nil {
+		c.BackToClientReponse(false, "用户 "+username+" 注册失败；失败原因："+err.Error())
+	}
 
-	c.Data["msg"] = "用户 " + username + " 注册成功！"
-	c.TplName = "user.tpl"
+	c.BackToClientReponse(true, "用户 "+username+" 注册成功")
 }
 
 // Login 用户登录
 func (c *AccountController) Login() {
+
 	username := c.GetString("username")
 	password := c.GetString("password")
 
 	fmt.Println(username)
 	fmt.Println(password)
 
-	if username != "" && password != "" {
-		var user models.User
-		user.UserName = username
-		if user.Read("name") != nil || user.Password != util.Md5([]byte(password)) {
-			c.Data["errmsg"] = "账号或密码错误"
-			fmt.Println("账号或密码错误")
-		} else {
-			authkey := util.Md5([]byte(user.Password))
-			cookie := strconv.Itoa(user.ID) + "|" + authkey
-			c.Ctx.SetCookie("auth", cookie)
-			fmt.Println("账号和密码正确")
-		}
+	if username == "" || password == "" {
+		c.BackToClientReponse(false, "用户名和密码不得为空")
+		return // [TODO] return or c.StopRun() ?
 	}
 
-	// 跳转到后台主页 or 传回 json 字串[TODO]
-	// ...
-	c.Data["post"] = "test content"
-	c.TplName = "admin/index.tpl"
+	var user models.User
+	user.UserName = username
+	if err := user.Read("user_name"); err != nil { // "user_name" 或 "username" 均可以
+		c.BackToClientReponse(false, "账号不存在")
+		return // [TODO] return or c.StopRun() ?
+	}
+
+	if user.Password != util.Md5([]byte(password)) {
+		c.BackToClientReponse(false, "密码错误")
+		return // [TODO] return or c.StopRun() ?
+	}
+
+	authkey := util.Md5([]byte(user.Password))
+	cookie := strconv.Itoa(user.ID) + "|" + authkey
+	c.Ctx.SetCookie("auth", cookie)
+	c.BackToClientReponse(true, "登录成功")
 }
 
 // Logout 用户退出
 func (c *AccountController) Logout() {
 	c.Ctx.SetCookie("auth", "")
-
-	// 跳转到登录页面 or 传回 json 字串[TODO]
-	// ...
+	c.BackToClientReponse(true, "注销成功")
 }
 
 // Profile 用户信息
 func (c *AccountController) Profile() {
-	user := models.User{ID: c.userid}
+	user := models.User{ID: c.userID}
 	if err := user.Read(); err != nil {
 		fmt.Println("The user not exists")
 	}
+
 	fmt.Println(user.ID)
 	fmt.Println(user.UserName)
 	fmt.Println(user.Email)

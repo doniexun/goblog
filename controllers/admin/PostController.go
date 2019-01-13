@@ -54,8 +54,8 @@ func (c *PostController) Add() {
 		return
 	}
 
-	post.AuthorID = c.userid
-	post.AuthorName = c.username
+	post.AuthorID = c.userID
+	post.AuthorName = c.userName
 	post.Content = content
 	post.Title = title
 	post.Insert()
@@ -96,8 +96,8 @@ func (c *PostController) Update() {
 		return
 	}
 
-	post.AuthorID = c.userid
-	post.AuthorName = c.username
+	post.AuthorID = c.userID
+	post.AuthorName = c.userName
 	post.Content = content
 	post.Title = title
 	post.Update("title", "content")

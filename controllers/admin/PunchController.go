@@ -1,12 +1,12 @@
 package admin
 
 import (
-	"fmt"
+	"encoding/json"
+	"log"
 	"time"
 
 	"github.com/astaxie/beego/orm"
 	"github.com/doniexun/goblog/models"
-	"github.com/lisijie/goblog/util"
 )
 
 // PunchController 打卡相关 controller
@@ -14,109 +14,119 @@ type PunchController struct {
 	BaseController
 }
 
+// JSONInfo 返回 Json 格式消息测试
+func (c *PunchController) JSONInfo() {
+	//content := `{"Name":"windness", "Age":20}`
+	//c.Ctx.WriteString(content)
+	//c.BackToClientReponse(true, "Hello World!\n")
+
+	user := &models.User{}
+	user.ID = 1
+	if err := user.Read(); err == nil {
+		c.BackToClientData(user)
+	}
+}
+
 // CreatePunch 创建打卡事项
+/// 从客户端 POST 来的 json 数据只包括：
+//// Title    打卡标题
+//// Content  打卡详细描述
+//// BeginTime  开始打卡时间
+//// EndTime    结束打卡时间
+//// PeriodUnit   打卡周期单位
+//// PeriodValue  打卡周期数值
+/// 从接口中获取的参数包括：
+//// group 群组编号
+/// [TODO] 待修改成 orm 事件处理
 func (c *PunchController) CreatePunch() {
 
-	punchItem := &models.PunchItem{}
-	punchItem.Title = "test title"
-	punchItem.Content = "test content"
+	// 解析 json 数据，并创建 打卡事项 PunchItem 实例
+	var punchItem models.PunchItem
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &punchItem); err != nil {
+		c.BackToClientReponse(false, "提交信息无法识别，请重新提交！"+err.Error())
+		return
+	}
 	punchItem.CreateTime = time.Now()
 	punchItem.CreateIP = c.ClientIP()
 	punchItem.LastUpdateTime = time.Now()
 	punchItem.LastUpdateIP = c.ClientIP()
-	punchItem.BeginTime = time.Now()
-	duration, _ := time.ParseDuration("+24h")
-	punchItem.EndTime = time.Now().Add(duration)
-	punchItem.PeriodUnit = 3
-	punchItem.PeriodValue = 1
 
+	// 获取当前登录用户信息
 	user := &models.User{}
-	user.UserName = "windness"
-	user.NickName = "doniexun"
-	user.Password = util.Md5([]byte("123456"))
-	user.Email = "windnessr@163.com"
-	user.Cellphone = "13800138000"
-	user.QQ = "1758953369"
-	user.Wechat = "splendidream"
-	user.RegisterTime = time.Now()
-	user.RegsiterIP = c.ClientIP()
-	user.LastLoginTime = time.Now()
-	user.LastLoginIP = c.ClientIP()
-	if err := user.Insert(); err != nil {
-		fmt.Println(err.Error())
+	user.ID = c.userID
+	if err := user.Read(); err != nil {
+		c.BackToClientReponse(false, "当前用户未登录"+err.Error())
+		return
 	}
 
+	groupID, err := c.GetInt("group")
+	if err != nil {
+		groupID = 0 // 若从请求中未获取到群编号
+	}
+
+	var group *models.Group
+	if groupID > 0 { // 群内创建
+		// 查找群实例
+		group = new(models.Group)
+		group.ID = groupID
+		if err := group.Read(); err != nil {
+			log.Println("群实例未能找到，原因可能是群编号有误" + err.Error())
+			c.BackToClientReponse(false, "群实例未能找到，原因可能是群编号有误")
+			return
+		}
+	} else { // 个人创建
+		// 创建群实例
+		group = new(models.Group)
+		group.Owner = user
+		group.Name = user.UserName + "'s group"
+		group.NichName = "this group's nickname"
+		group.Creator = user
+		group.CreateIP = c.ClientIP()
+		group.CreateTime = time.Now()
+		group.LastUpdator = user
+		group.LastUpdateIP = c.ClientIP()
+		group.LastUpdateTime = time.Now()
+		group.Announcement = "owner is lazy, no announcement..."
+		if err := group.Insert(); err != nil {
+			log.Println(err.Error())
+			c.BackToClientReponse(false, "群主信息插入DB失败")
+			return
+		}
+
+		// 将用户添加到 group.Members 中
+		// 在 group 表中插入对应 user 的 id
+		// 在 user 表中并没有插入对应 group 的id
+		m2m := orm.NewOrm().QueryM2M(group, "Members")
+		if _, err := m2m.Add(user); err != nil {
+			log.Println(err.Error())
+			c.BackToClientReponse(false, "用户信息插入群组失败")
+			return
+		}
+	}
+
+	// 关联关系
+	// 打卡事项与创建者、更新者关系
+	// 注意： User 中不记录打卡事项，只有在 User 打卡时，User中才会有 PunchRecords 的记录，但不会有 PunchItems 的关联记录
 	punchItem.Creator = user
 	punchItem.LastUpdator = user
 	if err := punchItem.Insert(); err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
+		c.BackToClientReponse(false, "打卡事项插入DB失败")
+		return
 	}
 
-	// 在 punch_item 表中插入对应 user 的 id
-	// 在 user 表中并没有插入对应 punch_item 的id
-	m2m := orm.NewOrm().QueryM2M(punchItem, "punchers")
-	if num, err := m2m.Add(user); err != nil {
-		fmt.Println("num ----- ", num)
-	} else {
-		fmt.Println(err.Error())
+	// 打卡事项与群组的关系
+	// 将打卡事项添加到 group 中
+	// 在 group 表中插入对应 punchItem 的 id
+	// 在 punchItem 表中并没有插入对应 group 的id
+	m2m := orm.NewOrm().QueryM2M(group, "PunchItems")
+	if _, err := m2m.Add(punchItem); err != nil {
+		log.Println(err.Error())
+		c.BackToClientReponse(false, "打卡事项插入群组失败")
+		return
 	}
 
-	// if c.userid < 0 {
-	// 	return
-	// }
-
-	// title := c.GetString("title")
-	// content := c.GetString("content")
-	// begintimestr := c.GetString("begintime")
-	// endtimestr := c.GetString("endtime")
-	// periodstr := c.GetString("period") // 打卡周期，默认24小时
-
-	// begintime, _ := time.Parse("2006-01-02 15:04:05", begintimestr)
-	// endtime, _ := time.Parse("2006-01-02 15:04:05", endtimestr)
-	// period, _ := time.Parse("2006-01-02 15:04:05", periodstr)
-
-	// var punchItem models.PunchItem
-	// punchItem.Title = title
-	// punchItem.Content = content
-	// punchItem.BeginTime = begintime
-	// punchItem.EndTime = endtime
-	// punchItem.Period = period
-
-	// var user models.User
-	// user.ID = c.userid
-	// if err := user.Read(); err != nil {
-	// 	return
-	// }
-
-	// // 根据传回的 type 类型来判定是来自个人菜单中的打卡创建，还是来自群的打卡创建
-	// typeValue, _ := c.GetInt("type")
-	// if typeValue == 0 { // 若是个人菜单创建
-	// 	// 新建一个 Group
-
-	// } else { // 若是群菜单创建
-	// 	// 查找 Group
-	// 	groupID, _ := c.GetInt("groupid")
-	// 	var group models.Group
-	// 	group.ID = groupID
-	// 	if err := group.Read(); err != nil {
-	// 		return
-	// 	}
-
-	// 	// 判断当前用户是否已经加入群
-	// 	// 若未加群，则应该报错：非本群用户不允许加入此群
-	// 	// [TODO]
-	// 	// 正常来说是不应该存在这个问题的
-
-	// 	// 判断当前群是否已经存在同名打卡事项
-	// 	// 同一个群中不允许存在同名打卡事项
-	// 	// [TODO]
-
-	// 	// 将打卡事项、群、用户相互关联起来
-	// 	// 打卡事项与群
-
-	// 	// 打卡事项与用户
-
-	// }
+	c.BackToClientReponse(true, "打卡事项插入群组成功")
 
 }
 
