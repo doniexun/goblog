@@ -2,6 +2,7 @@ package admin
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -174,9 +175,10 @@ func (c *PunchController) DeletePunch() {
 	// 删除群组表中的记录
 	// 删除多对多关系中的打卡事项
 	// [TODO] 待修复：目前删除打卡事项，群组和打卡事项的关系未解除！--2019-01-14 07:14:42
-	if _, err = orm.NewOrm().LoadRelated(&punchItem, "Groups"); err != nil { // 加载关系字段
+	if num, err := orm.NewOrm().LoadRelated(&punchItem, "Groups"); err == nil && num > 0 { // 加载关系字段
 		for _, group := range punchItem.Groups {
-			m2m := orm.NewOrm().QueryM2M(&group, "PunchItems")
+			fmt.Println(group.Name)
+			m2m := orm.NewOrm().QueryM2M(group, "PunchItems")
 			if m2m.Exist(&punchItem) { // 只在存在 多对多关系时 删除；[TODO] 是否不判断，直接删除，效率更高？
 				if _, err = m2m.Remove(&punchItem); err != nil {
 					log.Println("群组 " + group.Name + " 中的打卡事项 " + title + "移除失败" + err.Error())
