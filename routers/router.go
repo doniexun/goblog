@@ -20,6 +20,8 @@ func init() {
 	beego.Router("/test/createpunch", &admin.PunchController{}, "post:CreatePunch")
 	// [调试]删除打卡事项接口：GET /test/deletepunch?id=xxx
 	beego.Router("/test/deletepunch", &admin.PunchController{}, "get:DeletePunch")
+	// [调试]查询当前用户所参与的打卡事项列表[指定编号打卡事项信息]，数据以 json 格式返回：GET /test/userpunchs[?id=xxx]
+	beego.Router("/test/userpunchs", &admin.PunchController{}, "get:UserPunchList")
 	// [调试]获取服务器返回的json格式数据：GET /test/json
 	beego.Router("/test/json", &admin.PunchController{}, "get:JSONInfo")
 

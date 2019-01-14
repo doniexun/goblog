@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/astaxie/beego/orm"
@@ -174,7 +175,6 @@ func (c *PunchController) DeletePunch() {
 
 	// 删除群组表中的记录
 	// 删除多对多关系中的打卡事项
-	// [TODO] 待修复：目前删除打卡事项，群组和打卡事项的关系未解除！--2019-01-14 07:14:42
 	if num, err := orm.NewOrm().LoadRelated(&punchItem, "Groups"); err == nil && num > 0 { // 加载关系字段
 		for _, group := range punchItem.Groups {
 			fmt.Println(group.Name)
@@ -240,7 +240,16 @@ func (c *PunchController) PunchInfo() {
 
 }
 
-// PunchList 获取打卡事项清单
-func (c *PunchController) PunchList() {
+// UserPunchList 获取当前登录用户的打卡事项清单
+func (c *PunchController) UserPunchList() {
+	punchItemIDstr := c.GetString("id")
+	punchItemID, _ := strconv.ParseInt(punchItemIDstr, 10, 64)
+	punchItem := &models.PunchItem{ID: punchItemID}
+	if err := punchItem.Read(); err != nil {
+		log.Println("打卡事项编号有误" + err.Error())
+		c.BackToClientReponse(false, "打卡事项编号有误")
+		return
+	}
 
+	// TODO
 }
