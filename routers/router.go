@@ -20,7 +20,13 @@ func init() {
 	beego.Router("/test/createpunch", &admin.PunchController{}, "post:CreatePunch")
 	// [调试]删除打卡事项接口：GET /test/deletepunch?id=xxx
 	beego.Router("/test/deletepunch", &admin.PunchController{}, "get:DeletePunch")
-	// [调试]查询当前用户所参与的打卡事项列表[指定编号打卡事项信息]，数据以 json 格式返回：GET /test/userpunchs[?id=xxx]
+	// [调试]查询用户所参与的打卡事项列表[指定编号打卡事项信息]，数据以 json 格式返回：GET /test/userpunchs[?userid=xxx&punchid=xxx]
+	//      若提供了 userid、punchid，则返回指定用户的指定打卡事项的详细信息
+	//      若未提供 userid 、 punchid，则返回当前登录用户的打卡事项列表
+	//      若提供了 userid，未提供 punchid，则返回指定用户的打卡事项列表
+	//      若未提供 userid，提供了 punchid，则返回当前用户指定打卡事项的详细信息
+	// [TODO] 未带其他过滤参数，如活跃状态、指定时间段、参与人数最多……等过滤参数
+	// [TODO] 增加对查询打卡事项的权限，只有在权限表中的用户才有查询权限
 	beego.Router("/test/userpunchs", &admin.PunchController{}, "get:UserPunchList")
 	// [调试]获取服务器返回的json格式数据：GET /test/json
 	beego.Router("/test/json", &admin.PunchController{}, "get:JSONInfo")
