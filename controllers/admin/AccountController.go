@@ -104,15 +104,36 @@ func (c *AccountController) Profile() {
 	c.TplName = "admin/user.tpl"
 }
 
+// ExistByID 判断用户是否存在（通过用户 ID 来判断）
+func (c *AccountController) ExistByID(userid int64) bool {
+	user := models.User{ID: userid}
+	if user.Read() != nil {
+		return false
+	}
+	return true
+}
+
+// ExistByName 判断用户是否存在（通过用户名来判断）
+func (c *AccountController) ExistByName(userName string) bool {
+	user := models.User{UserName: userName}
+	if err := user.Read("UserName"); err != nil {
+		return false
+	}
+	return true
+}
+
 // AddDemoUser 添加测试用户
 func (c *AccountController) AddDemoUser() {
-	var user models.User
-	user.UserName = "windness"
-	if err := user.Read("UserName"); err == nil && user.ID > 0 {
-		log.Println("用户添加失败，用户 " + user.UserName + " 已经存在")
-		c.BackToClientReponse(false, "用户添加失败，用户 "+user.UserName+" 已经存在")
+
+	demoName := "windness"
+	if c.ExistByName(demoName) {
+		log.Println("用户添加失败，用户 " + demoName + " 已经存在")
+		c.BackToClientReponse(false, "用户添加失败，用户 "+demoName+" 已经存在")
 		return
 	}
+
+	var user models.User
+	user.UserName = demoName
 	user.NickName = "doniexun"
 	user.Password = util.Md5([]byte("123456"))
 	user.Email = "windnessr@163.com"
@@ -125,7 +146,7 @@ func (c *AccountController) AddDemoUser() {
 	user.LastLoginIP = c.ClientIP()
 	if err := user.Insert(); err != nil {
 		log.Println(err.Error())
-		c.BackToClientReponse(false, "用户添加失败")
+		c.BackToClientReponse(false, "用户添加失败"+err.Error())
 		return
 	}
 

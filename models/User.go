@@ -7,17 +7,17 @@ import (
 )
 
 // User 用户
-/// [TODO] User 还是应该与 PunchItem 直接关联，不然在还未打卡前，无法查询用户加入的打卡事项。
+// 用户名、邮箱和手机必须是全局唯一的
 type User struct {
 	ID            int64          `orm:"column(id);auto;pk"`
 	UserName      string         `orm:"unique;size(100)"`               // 用户名
-	NickName      string         `orm:"unique;size(100);null"`          // 用户昵称
+	NickName      string         `orm:"size(100);null"`                 // 用户昵称
 	Password      string         `orm:"size(100)"`                      // 用户密码
 	Avatar        string         `orm:"size(100);null"`                 // 用户头像所在 URL 地址
 	Email         string         `orm:"unique;size(100)"`               // 用户邮箱
 	QQ            string         `orm:"column(qq);size(20);null"`       // QQ号
 	Wechat        string         `orm:"size(255);null"`                 // 微信号
-	Cellphone     string         `orm:"size(20);null"`                  // 手机号
+	Cellphone     string         `orm:"unique;size(20);null"`           // 手机号
 	RegisterTime  time.Time      `orm:"auto_now_add;type(datetime)"`    // 注册时间
 	RegsiterIP    string         `orm:"column(register_ip);size(50)"`   // 注册 IP 地址
 	LastLoginTime time.Time      `orm:"type(datetime)"`                 // 最后登录时间

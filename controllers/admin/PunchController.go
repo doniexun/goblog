@@ -235,57 +235,84 @@ func (c *PunchController) QuitPunch() {
 	// [TODO]
 }
 
-// PunchInfo 获取打卡事项信息
-func (c *PunchController) PunchInfo() {
-
-}
-
-// UserPunchList 获取当前登录用户的打卡事项清单
-func (c *PunchController) UserPunchList() {
+// punchInfo 获取打卡事项信息
+func (c *PunchController) punchInfo(id int64) (*models.PunchItem, error) {
 
 	var (
-		err         error
-		userID      int64
-		punchItemID int64
+		err error
 	)
 
+	// 查询具体打卡事项
+	punchItem := &models.PunchItem{}
+	err = punchItem.Query().Filter("ID", id).RelatedSel().One(punchItem)
+	if err == nil {
+		return punchItem, nil
+	}
+
+	return nil, err
+}
+
+// userPunchList 获取打卡事项清单
+func (c *PunchController) userPunchList() ([]*models.PunchItem, error) {
+
+	var (
+		err    error
+		userID int64
+	)
+
+	// [WARN] 若用户输入的用户编号有误，也不应该为其查询当前登录用户的打卡事项清单
+	//        因为这和用户本身意愿是不相符的
+	userID, err = c.GetInt64("userid")
+	if err != nil {
+		if strings.Contains(err.Error(), "parsing \"\": invalid syntax") {
+			userID = c.userID // 用户未指定用户编号，则查询当前登录用户的打卡事项清单
+		} else {
+			log.Println("用户编号有误，打卡事项清单查询失败" + err.Error())
+			c.BackToClientReponse(false, "用户编号有误，打卡事项清单查询失败")
+			return nil, err
+		}
+	}
+
+	// 查询指定用户的存在
+	user := &models.User{ID: userID}
+	if err := user.Read(); err != nil {
+		log.Println("指定用户不存在，打卡事项清单查询失败" + err.Error())
+		c.BackToClientReponse(false, "指定用户不存在，打卡事项清单查询失败")
+		return nil, err
+	}
+
+	var punchItems []*models.PunchItem
+	if _, err = orm.NewOrm().QueryTable("punch_item").Filter("Punchers__User__ID", userID).RelatedSel().All(&punchItems); err == nil {
+		return punchItems, nil
+	}
+
+	return nil, err
+}
+
+// Punchs 获取打卡事项
+func (c *PunchController) Punchs() {
+	var (
+		err         error
+		punchItemID int64
+		punchItem   *models.PunchItem
+		punchItems  []*models.PunchItem
+	)
+
+	// 获取查询参数  punchid
 	punchItemID, err = c.GetInt64("punchid")
 	if err != nil {
 		if strings.Contains(err.Error(), "parsing \"\": invalid syntax") {
 			punchItemID = 0
 		} else {
 			log.Println("打卡事项编号有误，打卡事项清单查询失败" + err.Error())
-			c.BackToClientReponse(false, "打卡事项编号有误，打卡事项清单查询失败")
+			c.BackToClientReponse(false, "打卡事项编号有误，打卡事项清单查询失败"+err.Error())
 			return
 		}
 	}
 
 	// 若用户未指定 punchid，则说明要查询的是打卡事项清单，否则要查询的是具体某个打卡事项信息
 	if punchItemID == 0 { // 查询打卡事项清单
-		// [WARN] 若用户输入的用户编号有误，也不应该为其查询当前登录用户的打卡事项清单
-		//        因为这和用户本身意愿是不相符的
-		userID, err = c.GetInt64("userid")
-		if err != nil {
-			if strings.Contains(err.Error(), "parsing \"\": invalid syntax") {
-				userID = c.userID // 用户未指定用户编号，则查询当前登录用户的打卡事项清单
-			} else {
-				log.Println("用户编号有误，打卡事项清单查询失败" + err.Error())
-				c.BackToClientReponse(false, "用户编号有误，打卡事项清单查询失败")
-				return
-			}
-		}
-
-		// 查询指定用户的存在
-		user := &models.User{ID: userID}
-		if err := user.Read(); err != nil {
-			log.Println("指定用户不存在，打卡事项清单查询失败" + err.Error())
-			c.BackToClientReponse(false, "指定用户不存在，打卡事项清单查询失败")
-			return
-		}
-
-		var punchItems []*models.PunchItem
-		_, err = orm.NewOrm().QueryTable("punch_item").Filter("Punchers__User__ID", userID).RelatedSel().All(&punchItems)
-		if err == nil {
+		if punchItems, err = c.userPunchList(); err == nil {
 			c.BackToClientData(punchItems)
 			return
 		}
@@ -295,9 +322,7 @@ func (c *PunchController) UserPunchList() {
 	}
 
 	// 查询具体打卡事项
-	punchItem := &models.PunchItem{ID: punchItemID}
-	err = punchItem.Query().RelatedSel().One(punchItem)
-	if err == nil {
+	if punchItem, err = c.punchInfo(punchItemID); err == nil {
 		c.BackToClientData(punchItem)
 		return
 	}

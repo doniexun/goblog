@@ -27,7 +27,7 @@ func init() {
 	//      若未提供 userid，提供了 punchid，则返回当前用户指定打卡事项的详细信息
 	// [TODO] 未带其他过滤参数，如活跃状态、指定时间段、参与人数最多……等过滤参数
 	// [TODO] 增加对查询打卡事项的权限，只有在权限表中的用户才有查询权限
-	beego.Router("/test/userpunchs", &admin.PunchController{}, "get:UserPunchList")
+	beego.Router("/test/userpunchs", &admin.PunchController{}, "get:Punchs")
 	// [调试]获取服务器返回的json格式数据：GET /test/json
 	beego.Router("/test/json", &admin.PunchController{}, "get:JSONInfo")
 
